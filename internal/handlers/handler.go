@@ -6,21 +6,23 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/mux"
 	"github.com/Awes0meEman/shopping-time/internal/models"
+	"github.com/Awes0meEman/shopping-time/internal/repository"
+	"github.com/gorilla/mux"
 )
-var games []models.Game
 
 func CreateGame(w http.ResponseWriter, r *http.Request) {
 	var game models.Game
 	_ = json.NewDecoder(r.Body).Decode(&game)
-	game.Id = len(games) + 1
-	games = append(games, game)
+	_, err := repository.CreateGame(game)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
 	json.NewEncoder(w).Encode(game)
 }
 
 func GetAllGames(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(games)
+	json.NewEncoder(w).Encode(repository.GetAllGames())
 }
 
 func GetGameById(w http.ResponseWriter, r *http.Request) {
@@ -31,14 +33,14 @@ func GetGameById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, game := range games {
-		if game.Id == gameId {
-			json.NewEncoder(w).Encode(game)
-			return
-		}
-	}
+	game, err := repository.GetGameById(gameId)
 
-	http.NotFound(w, r)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	} else {
+		json.NewEncoder(w).Encode(game)
+	}
 }
 
 func UpdateGame(w http.ResponseWriter, r *http.Request) {
@@ -51,4 +53,30 @@ func UpdateGame(w http.ResponseWriter, r *http.Request) {
 
 	var updatedGame models.Game
 	_ = json.NewDecoder(r.Body).Decode(&updatedGame)
+	updatedGame.Id = gameId
+
+	game, err := repository.UpdateGameById(updatedGame)
+
+	if err != nil {
+		http.NotFound(w, r)
+	} else {
+		json.NewEncoder(w).Encode(game)
+	}
+}
+
+func DeleteGame(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	gameId, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Invalid Game ID", http.StatusBadRequest)
+		return
+	}
+
+	err = repository.DeleteGame(gameId)
+
+	if err != nil {
+		http.NotFound(w, r)
+	} else {
+		fmt.Fprintf(w, "Game with Id %d is deleted", gameId)
+	}
 }
