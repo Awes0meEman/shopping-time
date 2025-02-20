@@ -5,12 +5,13 @@ import (
 
 	"github.com/Awes0meEman/shopping-time/internal/models"
 )
-//==========================Games==========================
+
+// ==========================Games==========================
 var games []models.Game
 
 func GetGameById(id int) (models.Game, error) {
 	for _, game := range games {
-		if game.Id == id{
+		if game.Id == id {
 			return game, nil
 		}
 	}
@@ -49,19 +50,19 @@ func DeleteGame(id int) error {
 
 //==========================Games==========================
 
-//==========================Items==========================
+// ==========================Items==========================
 var items []models.Item
 
 func GetItemById(id int) (models.Item, error) {
 	for _, item := range items {
-		if item.Id == id{
+		if item.Id == id {
 			return item, nil
 		}
 	}
 	return *&models.Item{}, fmt.Errorf("No item with Id %d was found", id)
 }
 
-func GetAllItems() []models.Item{
+func GetAllItems() []models.Item {
 	return items
 }
 
@@ -72,7 +73,7 @@ func CreateItem(i models.Item) (models.Item, error) {
 }
 
 func UpdateItem(it models.Item) (models.Item, error) {
-	for i, item := range items{
+	for i, item := range items {
 		if item.Id == it.Id {
 			items[i] = it
 			return items[i], nil
@@ -82,7 +83,7 @@ func UpdateItem(it models.Item) (models.Item, error) {
 }
 
 func DeleteItem(id int) error {
-	for i, item := range items{
+	for i, item := range items {
 		if item.Id == id {
 			items = append(items[:i], items[i+1:]...)
 			return nil
